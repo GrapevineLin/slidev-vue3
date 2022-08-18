@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="" id="app"></div>
+
+</body>
+<script>
+    // 创建虚拟dom
+    function h (tag, props, children) {
+        return { tag, props, children }
+    }
+    // 将虚拟dom挂载到节点上
+    function mount (vdom, container) {
+        const { tag, props, children } = vdom
+        const el = vdom.el = document.createElement(tag)
+        // props
+        for (const prop in props) {
+            if (prop.startsWith('on')) {
+                const eventName = prop.slice(2).toLowerCase()
+                el.addEventListener(eventName, props[prop])
+                continue
+            }
+            el.setAttribute(prop, props[prop])
+        }
+        // children
+        if (typeof children === 'string') {
+            el.textContent = children
+        } else {
+            children.forEach(child => mount(child, el))
+        }
+        container.appendChild(el)
+    }
+
+    function patch (n1, n2) {
+        const el = n2.el = n1.el
+        const { tag: tag1, props: props1 } = n1
+        const { tag: tag2, props: props2 } = n2
+        if (tag1 != tag2) {
+            const parent = el.parentNode
+            parent.removeChild(el)
+            mount(n2, parent)
+        } else {
+            // props
+            for (const prop in props2 || {}) {
+                el.setAttribute(prop, props2[prop])
+            }
+            for (const prop in props1 || {}) {
+                if (!prop in props2) {
+                    el.removeAttribute(prop)
+                }
+            }
+            // children
+            if (typeof n1.children == 'string') {
+                if (typeof n2.children == 'string') {
+                    if (n1.children != n2.children) {
+                        el.textContent = n2.children
+                    }
+                } else {
+                    el.innerHTML = ''
+                    n2.children.forEach(child => mount(child, el))
+                }
+            } else {
+                if (typeof n2.children == 'string') {
+                    el.textContent = n2.children
+                } else {
+                    const comonLength = Math.min(n1.children.length, n2.children.length)
+                    for (let index = 0; index < comonLength; index++) {
+                        patch(n1.children[index], n2.children[index])
+                    }
+                    if (n1.children.length > n2.children.length) {
+                        n1.children.slice(n2.children.length)
+                            .forEach(child => child.el.parentNode.removeChild(child.el))
+                    }
+                    if (n2.children.length > n1.children.length) {
+                        n2.children.slice(n1.children.length)
+                            .forEach(child => mount(child, el))
+                    }
+                }
+            }
+        }
+
+    }
+
+
+    let activeEffect
+
+    class Dep {
+        constructor() {
+            this.subscribes = new Set()
+        }
+
+        depend () {
+            if (activeEffect) {
+                this.subscribes.add(activeEffect)
+            }
+        }
+
+        notify () {
+            this.subscribes.forEach(s => s())
+        }
+    }
+
+    // 注册追踪依赖变更的回调函数
+    function watchEffect (effect) {
+        activeEffect = effect
+        effect()
+        activeEffect = null
+    }
+
+
+
+    const targetMap = new Map();
+
+    function reactivity (raw) {
+        return new Proxy(raw, {
+            get (target, key, reviver) {
+                let depsMap = targetMap.get(target)
+                if (!depsMap) {
+                    depsMap = new Map()
+                    targetMap.set(target, depsMap)
+                }
+                let dep = depsMap.get(key)
+                if (!dep) {
+                    dep = new Dep()
+                    depsMap.set(key, dep)
+                }
+                dep.depend()
+                return Reflect.get(target, key, reviver)
+            },
+            set (target, key, value, reviver) {
+                const depsMap = targetMap.get(target)
+                const dep = depsMap.get(key)
+                const result = Reflect.set(target, key, value, reviver)
+                dep.notify()
+                return result
+            }
+        })
+    }
+
+    function mountApp (component, container) {
+        let isMounted = false
+        let prevVDom
+        watchEffect(() => {
+            if (!isMounted) {
+                prevVDom = component.render()
+                mount(prevVDom, container)
+                isMounted = true
+            } else {
+                const currVdom = component.render()
+                patch(prevVDom, currVdom)
+                prevVDom = currVdom
+            }
+        })
+    }
+
+    const App = {
+        data: reactivity({
+            count: 0
+        }),
+        render () {
+            return h('div', { onClick: () => { this.data.count++ } }, String(this.data.count))
+        }
+    }
+    mountApp(App, document.querySelector("#app"))
+
+
+</script>
+
+</html>
