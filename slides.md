@@ -144,3 +144,9 @@ Learn more: https://sli.dev/guide/syntax#embedded-styles
   display: none;
 }
 </style>
+
+---
+
+<h1 class="linear">思路来源</h1>
+
+<img src="/images/vue.jpg" class="m-15 h-60 shadow"  />
