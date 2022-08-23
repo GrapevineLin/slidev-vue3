@@ -23,7 +23,7 @@ drawings:
 css: unocss
 ---
 
-# Vue3设计与实现
+# Vue.js设计与实现
 
 <div class="text-s text-gray-400">简单实现一个MiniVue</div> 
 <div class="text-s text-gray-400">介绍CompositionAPI和OptionAPI的区别</div>
