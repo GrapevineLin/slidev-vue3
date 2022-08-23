@@ -62,8 +62,29 @@ The last comment block of each slide will be treated as slide notes. It will be 
 - 一款用于构建用户界面的 JavaScript **响应式** 框架
 - 渲染基于虚拟Dom，**声明式**
 
+<div  class='flex'>
 
-<div v-click class="opacity-75">
+<div v-click="1" style="flex:1">
+```html
+<!-- 声明式-->
+<div id="hello">
+  <h1>hello vue</h1>
+</div>
+```
+
+```javascript
+// 命令式
+const div = document.createElement("div")
+const h1 = document.createElement("h1")
+h1.textContent = "hello vue"
+document.body.appendChild(div)
+```
+
+</div>
+
+
+<div class="ml-20" v-click="2" style="flex:1">
+
 
 ```js
 const vnode = {
@@ -84,8 +105,10 @@ const vnode = {
   <h1>hello vue</h1>
 </div>
 ```
+</div>
 
 </div>
+
 
 
 ---
