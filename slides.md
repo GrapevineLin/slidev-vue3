@@ -57,7 +57,40 @@ The last comment block of each slide will be treated as slide notes. It will be 
 
 ---
 
-<h1 class="linear">Vue3的组成</h1>
+<h1 class="linear">Vue框架特点</h1>
+
+- 一款用于构建用户界面的 JavaScript **响应式** 框架
+- 渲染基于虚拟Dom，**声明式**
+
+
+<div v-click class="opacity-75">
+
+```js
+const vnode = {
+  tag: 'div',
+  props: {
+    id: 'hello'
+  },
+  children: [
+    {
+      tag:'h1',
+      children: 'hello vue'
+    }
+    /* 更多 vnode */
+  ]
+}
+
+<div id="hello">
+  <h1>hello vue</h1>
+</div>
+```
+
+</div>
+
+
+---
+
+<h1 class="linear">Vue内部模块</h1>
 
 <!-- Slidev is a slides maker and presenter designed for developers, consist of the following features -->
 <br>
@@ -89,6 +122,7 @@ Learn more: https://sli.dev/guide/syntax#embedded-styles
 -->
 
 ---
+
  
 <h1 class="linear">实现一个MiniVue</h1>
 
